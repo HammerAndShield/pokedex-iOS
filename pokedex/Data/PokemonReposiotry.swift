@@ -12,7 +12,7 @@ actor PokemonReposiotry {
     }
 
     private static func newDecoder() -> JSONDecoder {
-        var decoder = JSONDecoder()
+        let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         return decoder
     }
@@ -22,6 +22,10 @@ actor PokemonReposiotry {
             throw URLError(.badURL)
         }
         
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue("application/json", forHTTPHeaderField: "Accept")
+        
         let (data, response) = try await client.data(from: url)
         
         guard let httpResponse = response as? HTTPURLResponse else {
@@ -29,6 +33,7 @@ actor PokemonReposiotry {
         }
         
         let statusCode = httpResponse.statusCode
+        print("status code: ")
         
         guard(200...299).contains(statusCode) else {
             throw URLError(.badServerResponse)
