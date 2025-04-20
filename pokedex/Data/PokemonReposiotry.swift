@@ -1,6 +1,6 @@
 import Foundation
 
-actor PokemonReposiotry {
+class PokemonReposiotry {
     
     private static let baseUrl = "https://pokeapi.co/api/v2/pokemon"
     
@@ -18,15 +18,16 @@ actor PokemonReposiotry {
     }
     
     func getPokemon(id: Int) async throws -> Pokemon {
-        guard let url = URL(string: "\(Self.baseUrl)/\(id)") else {
+        guard let url = URL(string: "\(Self.baseUrl)/\(String(id))") else {
             throw URLError(.badURL)
         }
+        print("Fetching Pokemon with URL: \(url.absoluteString)")
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.addValue("application/json", forHTTPHeaderField: "Accept")
         
-        let (data, response) = try await client.data(from: url)
+        let (data, response) = try await client.data(for: request)
         
         guard let httpResponse = response as? HTTPURLResponse else {
             throw URLError(.badServerResponse)
