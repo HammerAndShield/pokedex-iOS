@@ -9,28 +9,21 @@ struct PokemonListView: View {
     
     var body: some View {
         VStack {
-            if let pokemon = vm.curMon {
-                AsyncImage(url: URL(string: pokemon.sprites.frontDefault)) { image in
-                    image
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 200, height: 200)
-                } placeholder: {
-                    ProgressView()
+            List(vm.state.pokemons) { pokemon in
+                HStack {
+                    AsyncImage(url: pokemon.spriteURL) { img in
+                        img
+                            .resizable()
+                    } placeholder: {
+                        ProgressView()
+                    }
+                    
+                    Text(pokemon.name)
                 }
-                Text(pokemon.name)
+                .frame(height: 80)
             }
-            Button("Get Some Mons") {
-                Task {
-                    await vm.onFetchPokemons()
-                }
-            }
-            .frame(width: 200, height: 50)
-            .background(Color.green)
-            .foregroundStyle(Color.white)
-            .clipShape(.capsule)
         }
         .padding()
-
     }
 }
 

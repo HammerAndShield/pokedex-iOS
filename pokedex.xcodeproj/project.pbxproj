@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		46E251A32DB5660C00F45732 /* Factory in Frameworks */ = {isa = PBXBuildFile; productRef = 46E251A22DB5660C00F45732 /* Factory */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		46BC0B102DB1FAC200D3D5C2 /* pokedex.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = pokedex.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				46E251A32DB5660C00F45732 /* Factory in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +70,7 @@
 			);
 			name = pokedex;
 			packageProductDependencies = (
+				46E251A22DB5660C00F45732 /* Factory */,
 			);
 			productName = pokedex;
 			productReference = 46BC0B102DB1FAC200D3D5C2 /* pokedex.app */;
@@ -94,6 +100,9 @@
 			);
 			mainGroup = 46BC0B072DB1FAC200D3D5C2;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				46E251A12DB5660C00F45732 /* XCRemoteSwiftPackageReference "Factory" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 46BC0B112DB1FAC200D3D5C2 /* Products */;
 			projectDirPath = "";
@@ -322,6 +331,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		46E251A12DB5660C00F45732 /* XCRemoteSwiftPackageReference "Factory" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/hmlongco/Factory";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.4.3;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		46E251A22DB5660C00F45732 /* Factory */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 46E251A12DB5660C00F45732 /* XCRemoteSwiftPackageReference "Factory" */;
+			productName = Factory;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 46BC0B082DB1FAC200D3D5C2 /* Project object */;
 }

@@ -1,20 +1,29 @@
 import Foundation
+import Factory
 
 @Observable
 @MainActor
 class PokemonListViewModel {
+    struct uiState {
+        var pokemons: [Pokemon] = []
+    }
     
-    private let repo = PokemonReposiotry()
-    private var idCounter = 1
+    @ObservationIgnored
+    @Injected(\.fetchBulkPokemonUseCase)
+    private var fetchBulkPokemonUseCase: FetchBulkPokemonUseCase
+
+    var state = uiState()
     
-    var curMon: Pokemon?
+    init() {
+        Task {
+            await onFetchPokemons()
+        }
+    }
     
     func onFetchPokemons() async {
         do {
-            let pokemon = try await repo.getPokemon(id: idCounter)
-            print("received pokemon: \(pokemon).")
-            curMon = pokemon
-            idCounter += 1
+            let newMons = try await fetchBulkPokemonUseCase.execute(range: 1...151)
+            state.pokemons.append(contentsOf: newMons)
         } catch let err {
             print("error getting pokemon: \(err)")
         }
