@@ -2,7 +2,7 @@ import Factory
 
 extension Container {
     
-    var pokemonReposiotry: Factory<PokemonRepository> {
+    var pokemonRepository: Factory<PokemonRepository> {
         Factory(self) { RemotePokemonRepository() }.singleton
     }
     

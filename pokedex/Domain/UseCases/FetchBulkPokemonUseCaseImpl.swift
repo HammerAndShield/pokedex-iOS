@@ -1,6 +1,6 @@
 
 
-class DefaultFetchBulkPokemonUseCase: FetchBulkPokemonUseCase {
+class FetchBulkPokemonUseCaseImpl: FetchBulkPokemonUseCase {
     
     private let repository: PokemonRepository
     
@@ -13,9 +13,10 @@ class DefaultFetchBulkPokemonUseCase: FetchBulkPokemonUseCase {
         
             for i in range {
                 group.addTask {
-                    return try await self.repository.getPokemon(id: i)
+                    return try await self.repository.getPokemonById(id: i)
                 }
             }
+            
             
             var results: [Pokemon] = []
             for try await result in group {

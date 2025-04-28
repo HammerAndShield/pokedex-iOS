@@ -13,13 +13,7 @@ class PokemonListViewModel {
     private var fetchBulkPokemonUseCase: FetchBulkPokemonUseCase
 
     var state = uiState()
-    
-    init() {
-        Task {
-            await onFetchPokemons()
-        }
-    }
-    
+        
     func onFetchPokemons() async {
         do {
             let newMons = try await fetchBulkPokemonUseCase.execute(range: 1...151)

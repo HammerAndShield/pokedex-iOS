@@ -6,14 +6,13 @@ import Foundation
 struct PokemonCard: View {
     
     let pokemon: Pokemon
-    let fireTypeColor = Color(.sRGB, red: 0.9, green: 0.3, blue: 0.3, opacity: 1.0)
     
     var body: some View {
         VStack(spacing: 8) {
             ZStack(alignment: .topLeading) {
                 ZStack {
                     RoundedRectangle(cornerRadius: 10)
-                        .fill(fireTypeColor.mix(with: .white, by: 0.2))
+                        .fill(pokemon.type.color.mix(with: .white, by: 0.2))
                     
                     AsyncImage(url: pokemon.spriteURL) { img in
                         img
@@ -32,9 +31,10 @@ struct PokemonCard: View {
                     .padding(6)
                     .background(
                         UnevenRoundedRectangle(cornerRadii: .init(topLeading: 10))
-                            .fill(fireTypeColor)
+                            .fill(pokemon.type.color)
                     )
             }
+            .aspectRatio(1, contentMode: .fit)
             
             
             Text(pokemon.name)
@@ -42,7 +42,7 @@ struct PokemonCard: View {
                 .foregroundStyle(.white)
                 .padding(.bottom)
         }
-        .background(RoundedRectangle(cornerRadius: 10).fill(fireTypeColor))
+        .background(RoundedRectangle(cornerRadius: 10).fill(pokemon.type.color))
         .padding()
     }
     

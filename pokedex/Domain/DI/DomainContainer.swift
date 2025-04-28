@@ -4,7 +4,7 @@ extension Container {
     
     var fetchBulkPokemonUseCase: Factory<FetchBulkPokemonUseCase> {
         Factory(self) {
-            DefaultFetchBulkPokemonUseCase(repository: self.pokemonReposiotry.resolve())
+            FetchBulkPokemonUseCaseImpl(repository: self.pokemonRepository.resolve())
         }.shared
     }
     

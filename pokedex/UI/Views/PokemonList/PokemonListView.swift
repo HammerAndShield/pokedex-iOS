@@ -1,6 +1,3 @@
-
-
-
 import SwiftUI
 
 struct PokemonListView: View {
@@ -8,25 +5,41 @@ struct PokemonListView: View {
     @State var vm = PokemonListViewModel()
     
     var body: some View {
-        VStack {
-            List(vm.state.pokemons) { pokemon in
-                HStack {
-                    AsyncImage(url: pokemon.spriteURL) { img in
-                        img
-                            .resizable()
-                    } placeholder: {
-                        ProgressView()
-                    }
-                    
-                    Text(pokemon.name)
-                }
-                .frame(height: 80)
+        PokemonListContentView(pokemons: vm.state.pokemons)
+            .task {
+                await vm.onFetchPokemons()
             }
+    }
+}
+
+fileprivate struct PokemonListContentView: View {
+    
+    var pokemons: [Pokemon]
+    
+    private var gridColumns: [GridItem] {
+        [
+            GridItem(.adaptive(minimum: 150), spacing: 16)
+        ]
+    }
+    
+    var body: some View {
+        ScrollView {
+            LazyVGrid(columns: gridColumns, spacing: 16) {
+                ForEach(pokemons) { pokemon in
+                    PokemonCard(pokemon: pokemon)
+                }
+            }
+            .padding()
         }
-        .padding()
+        .background() {
+            pokemonNavyBlue
+                .ignoresSafeArea()
+        }
     }
 }
 
 #Preview {
-    PokemonListView()
+    let pokemons = Array(repeating: PreviewPokemon, count: 50)
+    
+    PokemonListContentView(pokemons: pokemons)
 }

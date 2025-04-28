@@ -5,6 +5,7 @@ struct Pokemon: Identifiable {
     let name: String
     let id: Int
     let spriteURL: URL
+    let type: PokeType
     
     var idString: String {
         switch id {
