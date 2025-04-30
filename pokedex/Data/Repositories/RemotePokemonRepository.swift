@@ -85,13 +85,41 @@ class RemotePokemonRepository: PokemonRepository {
         
         do {
             let dto = try decoder.decode(PokemonListDto.self, from: data)
-            return try dto.toDomainModel()
+            return dto.toDomainModel()
         } catch let err as DecodingError {
             throw PokemonRepositoryError.dataSourceError(reason: "error decoding data", underlyingError: err)
         } catch let err {
             throw PokemonRepositoryError.repositoryError(reason: "error creating converting dto to domain model", underlyingError: err)
         }
     }
+    
+    func getBulkPokemonById(range: ClosedRange<Int>) async throws(PokemonRepositoryError) -> [Pokemon] {
+        do {
+            let pokemons = try await withThrowingTaskGroup { group in
+            
+                for i in range {
+                    group.addTask {
+                        return try await self.getPokemonById(id: i)
+                    }
+                }
+                
+                
+                var results: [Pokemon] = []
+                for try await result in group {
+                    results.append(result)
+                }
+                
+                return results.sorted { $0.id < $1.id }
+            }
+            
+            return pokemons
+        } catch let err as PokemonRepositoryError {
+            throw err
+        } catch let err {
+            throw PokemonRepositoryError.repositoryError(reason: "Unkown error fetching pokemone", underlyingError: err)
+        }
+    }
+
     
 }
 

@@ -5,16 +5,17 @@ struct PokemonListView: View {
     @State var vm = PokemonListViewModel()
     
     var body: some View {
-        PokemonListContentView(pokemons: vm.state.pokemons)
+        PokemonListContentView(state: vm.state)
             .task {
                 await vm.onFetchPokemons()
             }
+            .navigationTitle("Pokedex")
     }
 }
 
 fileprivate struct PokemonListContentView: View {
     
-    var pokemons: [Pokemon]
+    var state: PokemonListViewModel.UiState
     
     private var gridColumns: [GridItem] {
         [
@@ -23,23 +24,29 @@ fileprivate struct PokemonListContentView: View {
     }
     
     var body: some View {
-        ScrollView {
-            LazyVGrid(columns: gridColumns, spacing: 16) {
-                ForEach(pokemons) { pokemon in
-                    PokemonCard(pokemon: pokemon)
-                }
-            }
-            .padding()
-        }
-        .background() {
+        ZStack {
             pokemonNavyBlue
                 .ignoresSafeArea()
+            
+            if state.loading {
+                
+            } else {
+                ScrollView {
+                    LazyVGrid(columns: gridColumns, spacing: 16) {
+                        ForEach(state.pokemons) { pokemon in
+                            PokemonCard(pokemon: pokemon)
+                        }
+                    }
+                    .padding()
+                }
+            }
         }
     }
 }
 
 #Preview {
     let pokemons = Array(repeating: PreviewPokemon, count: 50)
+    let state = PokemonListViewModel.UiState(pokemons: pokemons, loading: false)
     
-    PokemonListContentView(pokemons: pokemons)
+    PokemonListContentView(state: state)
 }
