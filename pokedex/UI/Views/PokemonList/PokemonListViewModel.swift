@@ -4,33 +4,65 @@ import Factory
 @Observable
 @MainActor
 class PokemonListViewModel {
-    struct UiState {
-        var pokemonMetadata: [PokemonMetadata] = []
+    struct State {
         var pokemons: [Pokemon] = []
-        var loading: Bool = true
+        var isLoading: Bool = false
+        var canLoadMore: Bool = true
+        var searchText: String = ""
+        var errorMessage: String? = nil
     }
     
-    @ObservationIgnored
-    @Injected(\.pokemonRepository)
-    private var pokemonRepo: PokemonRepository
+    @ObservationIgnored @Injected(\.pokemonRepository) private var pokemonRepo: PokemonRepository
 
-    var state = UiState()
+    var state = State()
     
-    private func getAllPokemonMetadata() async {
+    private var allPokemonMetadata: [PokemonMetadata] = []
+    private var allPokemons: [Pokemon] = []
+    private var searchPokemons: [Pokemon] = []
+    
+    private let maxPokemonId: Int = 1025
+    private let pageSize: Int = 30
+    private var nextPageOffset: Int = 0
+    
+    func initialize() async {
         do {
-            let metadata = try await pokemonRepo.getPokemonList(limit: 1302)
+            state.isLoading = true
+            let metadata = try await pokemonRepo.getPokemonList(limit: maxPokemonId)
+            state.isLoading = false
+            allPokemonMetadata = metadata
+            
+            await onFetchPokemons()
         } catch let err {
             print("error getting metadata: \(err)")
         }
     }
         
     func onFetchPokemons() async {
+        guard !state.isLoading && state.canLoadMore else { return }
+        
+        state.errorMessage = nil
+        state.isLoading = true
+        defer { state.isLoading = false }
+        
+        let endRange = min(nextPageOffset + pageSize-1, allPokemonMetadata.count)
+        let ids = allPokemonMetadata[nextPageOffset..<endRange].map { $0.id }
+        
         do {
-            let newMons = try await pokemonRepo.getBulkPokemonById(range: 1...151)
+            let newMons = try await fetchMorePokemons(ids: ids)
             state.pokemons.append(contentsOf: newMons)
+            
+            if endRange == maxPokemonId {
+                state.canLoadMore = false
+            }
+            nextPageOffset = endRange + 1
         } catch let err {
             print("error getting pokemon: \(err)")
+            state.errorMessage = "Oh no! Something went wrong. Try again later."
         }
+    }
+    
+    private func fetchMorePokemons(ids: [Int]) async throws(PokemonRepositoryError) -> [Pokemon] {
+        return try await pokemonRepo.getBulkPokemonById(ids: ids)
     }
     
 }

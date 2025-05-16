@@ -5,9 +5,12 @@ struct PokemonListView: View {
     @State var vm = PokemonListViewModel()
     
     var body: some View {
-        PokemonListContentView(state: vm.state)
+        PokemonListContentView(
+            state: vm.state,
+            onLoadMore: vm.onFetchPokemons
+        )
             .task {
-                await vm.onFetchPokemons()
+                await vm.initialize()
             }
             .navigationTitle("Pokedex")
     }
@@ -15,7 +18,8 @@ struct PokemonListView: View {
 
 fileprivate struct PokemonListContentView: View {
     
-    var state: PokemonListViewModel.UiState
+    var state: PokemonListViewModel.State
+    var onLoadMore: () async -> Void
     
     private var gridColumns: [GridItem] {
         [
@@ -28,25 +32,37 @@ fileprivate struct PokemonListContentView: View {
             pokemonNavyBlue
                 .ignoresSafeArea()
             
-            if state.loading {
-                
-            } else {
-                ScrollView {
+    
+            ScrollView {
+                LazyVStack {
                     LazyVGrid(columns: gridColumns, spacing: 16) {
                         ForEach(state.pokemons) { pokemon in
                             PokemonCard(pokemon: pokemon)
                         }
                     }
                     .padding()
+                    
+                    Group {
+                        if state.isLoading {
+                            ProgressView()
+                                
+                        } else if state.canLoadMore {
+                            Color.clear
+                                .frame(height: 1)
+                                .onAppear {
+                                    Task {
+                                        await onLoadMore()
+                                    }
+                                }
+                        }
+                    }.padding(.bottom)
                 }
             }
+            
         }
     }
 }
 
 #Preview {
-    let pokemons = Array(repeating: PreviewPokemon, count: 50)
-    let state = PokemonListViewModel.UiState(pokemons: pokemons, loading: false)
-    
-    PokemonListContentView(state: state)
+    PokemonListView()
 }

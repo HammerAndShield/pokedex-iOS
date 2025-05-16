@@ -93,16 +93,15 @@ class RemotePokemonRepository: PokemonRepository {
         }
     }
     
-    func getBulkPokemonById(range: ClosedRange<Int>) async throws(PokemonRepositoryError) -> [Pokemon] {
+    func getBulkPokemonById(ids: [Int]) async throws(PokemonRepositoryError) -> [Pokemon] {
         do {
             let pokemons = try await withThrowingTaskGroup { group in
             
-                for i in range {
+                for i in ids {
                     group.addTask {
                         return try await self.getPokemonById(id: i)
                     }
                 }
-                
                 
                 var results: [Pokemon] = []
                 for try await result in group {
