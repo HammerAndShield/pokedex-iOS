@@ -19,6 +19,7 @@ class PokemonListViewModel {
     private var allPokemonMetadata: [PokemonMetadata] = []
     private var allPokemons: [Pokemon] = []
     private var searchPokemons: [Pokemon] = []
+    private var searchTask: Task<Void, Never>? = nil
     
     private let maxPokemonId: Int = 1025
     private let pageSize: Int = 30
@@ -34,6 +35,27 @@ class PokemonListViewModel {
             await onFetchPokemons()
         } catch let err {
             print("error getting metadata: \(err)")
+        }
+    }
+    
+    deinit {
+        Task { @MainActor [weak self] in
+            self?.searchTask?.cancel()
+        }
+    }
+    
+    func onSearchPokemon(_ text: String) async {
+        state.searchText = text
+        if text == "" {
+            state.pokemons = allPokemons
+            searchTask?.cancel()
+            searchPokemons.removeAll()
+        } else {
+            state.pokemons = searchPokemons
+            searchTask?.cancel()
+            searchTask = Task {
+                try? await Task.sleep(for: .milliseconds(300))
+            }
         }
     }
         

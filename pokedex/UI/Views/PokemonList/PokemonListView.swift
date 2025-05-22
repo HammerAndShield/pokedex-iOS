@@ -7,12 +7,12 @@ struct PokemonListView: View {
     var body: some View {
         PokemonListContentView(
             state: vm.state,
-            onLoadMore: vm.onFetchPokemons
+            onLoadMore: vm.onFetchPokemons,
+            onSearchPokemons: vm.onSearchPokemon
         )
             .task {
                 await vm.initialize()
             }
-            .navigationTitle("Pokedex")
     }
 }
 
@@ -20,11 +20,25 @@ fileprivate struct PokemonListContentView: View {
     
     var state: PokemonListViewModel.State
     var onLoadMore: () async -> Void
+    var onSearchPokemons: (String) -> Void
     
     private var gridColumns: [GridItem] {
         [
             GridItem(.adaptive(minimum: 150), spacing: 16)
         ]
+    }
+    
+    private var searchBinding: Binding<String> {
+        Binding(
+            get: {
+                state.searchText
+            },
+            set: { newSearchText in
+                Task {
+                    onSearchPokemons(newSearchText)
+                }
+            }
+        )
     }
     
     var body: some View {
@@ -58,11 +72,20 @@ fileprivate struct PokemonListContentView: View {
                     }.padding(.bottom)
                 }
             }
-            
+            .navigationTitle("Pokedex")
+            .toolbarTitleDisplayMode(.inlineLarge)
+            .searchable(text: searchBinding, prompt: "Search Pokemon")
         }
     }
 }
 
 #Preview {
-    PokemonListView()
+    let state = PokemonListViewModel.State(pokemons: getPreviewPokemon(), isLoading: false, canLoadMore: true)
+    NavigationStack {
+        PokemonListContentView(
+            state: state,
+            onLoadMore: { print("Preview: onLoadMore called") },
+            onSearchPokemons: { _ in print("Preview: onSearchPokemons called") }
+        )
+    }
 }

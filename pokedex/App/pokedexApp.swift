@@ -14,6 +14,7 @@ struct pokedexApp: App {
             NavigationStack {
                 PokemonListView()
             }
+            .preferredColorScheme(.dark)
         }
     }
 }
