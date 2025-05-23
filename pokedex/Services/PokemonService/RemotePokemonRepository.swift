@@ -1,6 +1,6 @@
 import Foundation
 
-class RemotePokemonRepository: PokemonRepository {
+class PokemonService: PokemonServiceProtocol {
     
     private static let baseUrl = URL(string: "https://pokeapi.co/api/v2/pokemon")!
     
@@ -17,7 +17,7 @@ class RemotePokemonRepository: PokemonRepository {
         return decoder
     }
     
-    func getPokemonById(id: Int) async throws(PokemonRepositoryError) -> Pokemon {
+    func getPokemonById(id: Int) async throws(PokemonError) -> Pokemon {
         let url = Self.baseUrl.appendingPathComponent(String(id))
                 
         var data: Data
@@ -25,20 +25,20 @@ class RemotePokemonRepository: PokemonRepository {
         do {
             (data, response) = try await client.data(from: url)
         } catch let err {
-            throw PokemonRepositoryError.dataSourceError(reason: "error fetching data from url: \(err)", underlyingError: err)
+            throw PokemonError.dataSourceError(reason: "error fetching data from url: \(err)", underlyingError: err)
         }
         
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw PokemonRepositoryError.dataSourceError(reason: "unable to cast response to HTTPURLResponse")
+            throw PokemonError.dataSourceError(reason: "unable to cast response to HTTPURLResponse")
         }
         
         let statusCode = httpResponse.statusCode
         guard (200...299).contains(statusCode) else {
             switch statusCode {
             case 404:
-                throw PokemonRepositoryError.domainError(.notFound)
+                throw PokemonError.notFound
             default:
-                throw PokemonRepositoryError.dataSourceError(reason: "status code \(statusCode) not in 2xx range")
+                throw PokemonError.dataSourceError(reason: "status code \(statusCode) not in 2xx range")
             }
         }
         
@@ -46,15 +46,15 @@ class RemotePokemonRepository: PokemonRepository {
             let dto = try decoder.decode(PokemonDto.self, from: data)
             return try dto.toPokemon()
         } catch let err as DecodingError {
-            throw PokemonRepositoryError.dataSourceError(reason: "error decoding data", underlyingError: err)
+            throw PokemonError.dataSourceError(reason: "error decoding data", underlyingError: err)
         } catch let err {
-            throw PokemonRepositoryError.repositoryError(reason: "error creating converting dto to domain model", underlyingError: err)
+            throw PokemonError.dataSourceError(reason: "error creating converting dto to domain model", underlyingError: err)
         }
     }
     
-    func getPokemonList(limit: Int) async throws(PokemonRepositoryError) -> [PokemonMetadata] {
+    func getPokemonList(limit: Int) async throws(PokemonError) -> [PokemonMetadata] {
         guard var components = URLComponents(url: Self.baseUrl, resolvingAgainstBaseURL: true) else {
-            throw PokemonRepositoryError.repositoryError(reason: "Failed to create request url components")
+            throw PokemonError.dataSourceError(reason: "Failed to create request url components")
         }
         
         let queryItems = [
@@ -63,7 +63,7 @@ class RemotePokemonRepository: PokemonRepository {
         components.queryItems = queryItems
         
         guard let url = components.url else {
-            throw PokemonRepositoryError.repositoryError(reason: "Failed to construct url")
+            throw PokemonError.dataSourceError(reason: "Failed to construct url")
         }
         
         var data: Data
@@ -71,29 +71,29 @@ class RemotePokemonRepository: PokemonRepository {
         do {
             (data, response) = try await client.data(from: url)
         } catch let err {
-            throw PokemonRepositoryError.dataSourceError(reason: "error fetching data from url", underlyingError: err)
+            throw PokemonError.dataSourceError(reason: "error fetching data from url", underlyingError: err)
         }
         
         guard let httpResponse = response as? HTTPURLResponse else {
-            throw PokemonRepositoryError.dataSourceError(reason: "unable to cast response to HTTPURLResponse")
+            throw PokemonError.dataSourceError(reason: "unable to cast response to HTTPURLResponse")
         }
         
         let statusCode = httpResponse.statusCode
         guard (200...299).contains(statusCode) else {
-            throw PokemonRepositoryError.dataSourceError(reason: "status code \(statusCode) not in 2xx range", underlyingError: nil)
+            throw PokemonError.dataSourceError(reason: "status code \(statusCode) not in 2xx range", underlyingError: nil)
         }
         
         do {
             let dto = try decoder.decode(PokemonListDto.self, from: data)
             return dto.toDomainModel()
         } catch let err as DecodingError {
-            throw PokemonRepositoryError.dataSourceError(reason: "error decoding data", underlyingError: err)
+            throw PokemonError.dataSourceError(reason: "error decoding data", underlyingError: err)
         } catch let err {
-            throw PokemonRepositoryError.repositoryError(reason: "error creating converting dto to domain model", underlyingError: err)
+            throw PokemonError.dataSourceError(reason: "error creating converting dto to domain model", underlyingError: err)
         }
     }
     
-    func getBulkPokemonById(ids: [Int]) async throws(PokemonRepositoryError) -> [Pokemon] {
+    func getBulkPokemonById(ids: [Int]) async throws(PokemonError) -> [Pokemon] {
         do {
             let pokemons = try await withThrowingTaskGroup { group in
             
@@ -112,10 +112,10 @@ class RemotePokemonRepository: PokemonRepository {
             }
             
             return pokemons
-        } catch let err as PokemonRepositoryError {
+        } catch let err as PokemonError {
             throw err
         } catch let err {
-            throw PokemonRepositoryError.repositoryError(reason: "Unkown error fetching pokemone", underlyingError: err)
+            throw PokemonError.dataSourceError(reason: "Unkown error fetching pokemone", underlyingError: err)
         }
     }
 

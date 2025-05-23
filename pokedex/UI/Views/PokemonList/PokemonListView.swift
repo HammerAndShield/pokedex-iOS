@@ -20,7 +20,7 @@ fileprivate struct PokemonListContentView: View {
     
     var state: PokemonListViewModel.State
     var onLoadMore: () async -> Void
-    var onSearchPokemons: (String) -> Void
+    var onSearchPokemons: (String) async -> Void
     
     private var gridColumns: [GridItem] {
         [
@@ -35,7 +35,7 @@ fileprivate struct PokemonListContentView: View {
             },
             set: { newSearchText in
                 Task {
-                    onSearchPokemons(newSearchText)
+                    await onSearchPokemons(newSearchText)
                 }
             }
         )

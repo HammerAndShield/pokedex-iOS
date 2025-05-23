@@ -12,7 +12,7 @@ class PokemonListViewModel {
         var errorMessage: String? = nil
     }
     
-    @ObservationIgnored @Injected(\.pokemonRepository) private var pokemonRepo: PokemonRepository
+    @ObservationIgnored @Injected(\.pokemonService) private var pokemonRepo: PokemonServiceProtocol
 
     var state = State()
     
@@ -83,7 +83,7 @@ class PokemonListViewModel {
         }
     }
     
-    private func fetchMorePokemons(ids: [Int]) async throws(PokemonRepositoryError) -> [Pokemon] {
+    private func fetchMorePokemons(ids: [Int]) async throws(PokemonError) -> [Pokemon] {
         return try await pokemonRepo.getBulkPokemonById(ids: ids)
     }
     
